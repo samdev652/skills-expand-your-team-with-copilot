@@ -553,7 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </ul>
       </div>
       <div class="activity-card-actions">
-        <button class="share-button" data-activity="${name}" data-description="${details.description.replace(/"/g, '&quot;')}" data-schedule="${formattedSchedule.replace(/"/g, '&quot;')}" title="Share this activity">
+        <button class="share-button" title="Share this activity">
           <span class="share-icon">🔗</span>
           <span>Share</span>
         </button>
@@ -583,9 +583,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add click handler for share button
     const shareButton = activityCard.querySelector(".share-button");
-    shareButton.addEventListener("click", () => {
-      handleShare(name, details.description, formattedSchedule);
-    });
+    if (shareButton) {
+      shareButton.addEventListener("click", () => {
+        handleShare(name, details.description, formattedSchedule);
+      });
+    }
 
     // Add click handler for register button (only when authenticated)
     if (currentUser) {
