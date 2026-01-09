@@ -837,7 +837,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await navigator.share(shareData);
         showMessage("Activity shared successfully!", "success");
       } catch (error) {
-        // User cancelled or share failed
+        // AbortError means user cancelled the share - this is normal, no feedback needed
         if (error.name !== 'AbortError') {
           console.error("Error sharing:", error);
           fallbackShare(shareData);
