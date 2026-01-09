@@ -553,6 +553,10 @@ document.addEventListener("DOMContentLoaded", () => {
         </ul>
       </div>
       <div class="activity-card-actions">
+        <button class="share-button" data-activity="${name}" data-description="${details.description.replace(/"/g, '&quot;')}" data-schedule="${formattedSchedule.replace(/"/g, '&quot;')}" title="Share this activity">
+          <span class="share-icon">🔗</span>
+          <span>Share</span>
+        </button>
         ${
           currentUser
             ? `
@@ -575,6 +579,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    shareButton.addEventListener("click", () => {
+      handleShare(name, details.description, formattedSchedule);
     });
 
     // Add click handler for register button (only when authenticated)
@@ -809,6 +819,52 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       messageDiv.classList.add("hidden");
     }, 5000);
+  }
+
+  // Handle share button click
+  async function handleShare(activityName, description, schedule) {
+    const shareData = {
+      title: `${activityName} - Mergington High School`,
+      text: `Check out this activity at Mergington High School!\n\n${activityName}\n${description}\n\nSchedule: ${schedule}`,
+      url: window.location.href
+    };
+
+    // Check if Web Share API is supported
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        showMessage("Activity shared successfully!", "success");
+      } catch (error) {
+        // User cancelled or share failed
+        if (error.name !== 'AbortError') {
+          console.error("Error sharing:", error);
+          fallbackShare(shareData);
+        }
+      }
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      fallbackShare(shareData);
+    }
+  }
+
+  // Fallback share method - copy to clipboard
+  function fallbackShare(shareData) {
+    const textToCopy = `${shareData.text}\n\n${shareData.url}`;
+    
+    // Try to copy to clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy)
+        .then(() => {
+          showMessage("Activity link copied to clipboard!", "success");
+        })
+        .catch((error) => {
+          console.error("Failed to copy:", error);
+          showMessage("Unable to share. Please copy the URL manually.", "info");
+        });
+    } else {
+      // Very old browser fallback
+      showMessage("Sharing not supported. Please copy the URL from your browser.", "info");
+    }
   }
 
   // Handle form submission
